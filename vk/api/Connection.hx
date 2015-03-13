@@ -129,24 +129,27 @@ class Connection
 		
 		this.tempPhoto = img;
 		
-		this.api("photos.getWallUploadServer", { }, uploadWallPhoto2, error);
+		this.api("photos.getWallUploadServer", { }, uploadWallPhotoStep2, error);
 	}
 	
 	private function uploadWallPhotoStep2(params: Dynamic)
 	{
-		var sender:URLRequest = new URLRequest(url);
-		 var vars:URLVariables = new URLVariables();
-		 vars.photo = tempPhoto;
-		 sender.data = vars;
-		 sender.method = URLRequestMethod.POST;
-		 urlLoader = new URLLoader();
-		 urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-		 urlLoader.addEventListener(Event.COMPLETE, completeF);
-		 try {
-		  urlLoader.load(sender);
-		 } catch (e:Error) {
-		  trace(e);
-		 }
+		var sender:URLRequest = new URLRequest(params.upload_url);
+		var vars:URLVariables = new URLVariables();
+		vars.photo = tempPhoto;
+		sender.data = vars;
+		sender.method = URLRequestMethod.POST;
+		var urlLoader = new URLLoader();
+		urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+		urlLoader.addEventListener(Event.COMPLETE, completeF);
+		try 
+		{
+			urlLoader.load(sender);
+		} 
+		catch (e:Error) 
+		{
+			trace(e);
+		}
 
 	}
 
