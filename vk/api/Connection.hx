@@ -6,9 +6,11 @@ import flash.events.StatusEvent;
 import flash.net.LocalConnection;
 import lime.utils.ByteArray;
 import openfl.events.Event;
+import openfl.events.IOErrorEvent;
 import openfl.net.URLLoader;
 import openfl.net.URLLoaderDataFormat;
 import openfl.net.URLRequest;
+import openfl.net.URLRequestHeader;
 import openfl.net.URLRequestMethod;
 import openfl.net.URLVariables;
 import vk.events.CustomEvent;
@@ -132,16 +134,19 @@ class Connection
 		this.api("photos.getWallUploadServer", { }, uploadWallPhotoStep2, error);
 	}
 	
+	var urlLoader : URLLoader;
 	private function uploadWallPhotoStep2(params: Dynamic)
 	{
-		var sender:URLRequest = new URLRequest(params.upload_url);
+		trace(params);
+		/*var sender:URLRequest = new URLRequest(params.upload_url);
 		var vars:URLVariables = new URLVariables();
-		vars.photo = tempPhoto;
-		sender.data = vars;
+		vars.photo = tempPhoto;		
+		sender.data = "photo:" + tempPhoto;
 		sender.method = URLRequestMethod.POST;
-		var urlLoader = new URLLoader();
-		urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
-		urlLoader.addEventListener(Event.COMPLETE, completeF);
+		urlLoader = new URLLoader();
+		urlLoader.dataFormat = URLLoaderDataFormat.BINARY;		
+		urlLoader.addEventListener(Event.COMPLETE, uploadFinish);
+		
 		try 
 		{
 			urlLoader.load(sender);
@@ -149,8 +154,40 @@ class Connection
 		catch (e:Error) 
 		{
 			trace(e);
+		}*/
+		
+		var imageStream = tempPhoto;
+ 
+		var stream:ByteArray = new ByteArray();
+		var boundary:String = "----------Ij5ae0ae0KM7GI3KM7";
+		var imageName:String	= "image" + ".png";
+		stream.writeUTFBytes("--" + boundary + '\r\nContent-Disposition: form-data; name="file1"; filename="' + imageName + '"\r\nContent-Type: image/png\r\n\r\n');
+		stream.writeBytes(imageStream);
+		stream.writeUTFBytes("\r\n--" + boundary + '--\r\n');
+		var header:URLRequestHeader = new URLRequestHeader ("Content-type", "multipart/form-data; boundary=" + boundary);
+		var urlRequest:URLRequest = new URLRequest(params.upload_url);
+		urlRequest.requestHeaders.push(header);
+		urlRequest.method = URLRequestMethod.POST;
+		urlRequest.data = stream;
+		urlLoader = new URLLoader();
+		urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+		urlLoader.addEventListener( Event.COMPLETE, uploadFinish );
+		urlLoader.addEventListener( IOErrorEvent.IO_ERROR, errorF );
+		try 
+		{
+			urlLoader.load( urlRequest );
+		}
+		catch (e:Error) 
+		{
+			errorF(e);
 		}
 
+
+	}
+	
+	private function uploadFinish(e:Event):Void 
+	{
+		completeF(urlLoader.data);
 	}
 
 }
