@@ -4,12 +4,19 @@ import flash.errors.Error;
 import flash.events.EventDispatcher;
 import flash.events.StatusEvent;
 import flash.net.LocalConnection;
+import lime.utils.ByteArray;
+import openfl.events.Event;
+import openfl.net.URLLoader;
+import openfl.net.URLLoaderDataFormat;
+import openfl.net.URLRequest;
+import openfl.net.URLRequestMethod;
+import openfl.net.URLVariables;
 import vk.events.CustomEvent;
 
 /**
  * Performs API Calls and dispatch some VK related events
  * 
- * @author Artyom Silivonchik
+ * @author Artyom Silivonchik, Loutchansy Oleg
  * Mostly based on APIConnection by Andrew Rogozov
  */
 class Connection
@@ -20,6 +27,9 @@ class Connection
 	
 	private var pendingRequests: Array<Array<Dynamic>>;
 	private var loaded: Bool = false;
+	
+	private var completeF : Dynamic -> Void;
+	private var errorF : Dynamic -> Void;
 	
 	public function new(params:Dynamic)  
 	{
@@ -109,4 +119,35 @@ class Connection
 	{
 		receivingLC.client.addEventListener(event, _callback);
 	}
+	
+	private var tempPhoto : ByteArray;
+	
+	public function uploadWallPhoto(img : ByteArray, options : Dynamic, complete : Dynamic -> Void, error : Dynamic -> Void) : Void 
+	{
+		completeF = complete;
+		errorF = error;
+		
+		this.tempPhoto = img;
+		
+		this.api("photos.getWallUploadServer", { }, uploadWallPhoto2, error);
+	}
+	
+	private function uploadWallPhotoStep2(params: Dynamic)
+	{
+		var sender:URLRequest = new URLRequest(url);
+		 var vars:URLVariables = new URLVariables();
+		 vars.photo = tempPhoto;
+		 sender.data = vars;
+		 sender.method = URLRequestMethod.POST;
+		 urlLoader = new URLLoader();
+		 urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+		 urlLoader.addEventListener(Event.COMPLETE, completeF);
+		 try {
+		  urlLoader.load(sender);
+		 } catch (e:Error) {
+		  trace(e);
+		 }
+
+	}
+
 }
