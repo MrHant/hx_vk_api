@@ -23,8 +23,13 @@ class Client extends EventDispatcher implements IClient
 		{
 			if (data.error != null) 
 			{
-				onError(data.error);
-			} else {
+				if (onError != null) {
+					onError(data.error);
+				}
+				else {
+					trace("VKAPI Error: " + data.error);
+				}
+			} else if (onComplete != null) {
 				onComplete(data.response);
 			}
 		}
