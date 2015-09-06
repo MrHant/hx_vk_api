@@ -57,3 +57,10 @@ class Main extend Sprite
 
 }
 ```
+
+For local machine debuge mode:
+```Haxe
+
+var vk = Vk.createTested();
+
+```

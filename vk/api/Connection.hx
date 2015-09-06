@@ -23,21 +23,22 @@ import vk.events.CustomEvent;
  */
 class Connection
 {
-	private var connectionName: String;
-	private var sendingLC: LocalConnection;
-	private var receivingLC: LocalConnection;
+	var connectionName 	: String;
+	var sendingLC		: LocalConnection;
+	var receivingLC		: LocalConnection;
 	
-	private var pendingRequests: Array<Array<Dynamic>>;
-	private var loaded: Bool = false;
+	var pendingRequests	: Array<Array<Dynamic>>;
+	var loaded			: Bool = false;
 	
-	private var completeF : Dynamic -> Void;
-	private var errorF : Dynamic -> Void;
+	var completeF 		: Dynamic -> Void;
+	var errorF 			: Dynamic -> Void;
+	var isTestMode 		: Bool = false;
 	
 	public function new(params:Dynamic)  
 	{
 		var api_url: String = 'https://api.vk.com/api.php';
 		if (params.api_url) api_url = params.api_url;
-
+	
 		connectionName = params.lc_name;
 		if (connectionName == null)
 		{
@@ -62,18 +63,26 @@ class Connection
 			trace("Can't connect from App. The connection name is already being used by another SWF");
 		}
 		
-		sendingLC.addEventListener(StatusEvent.STATUS, onInitStatus);
+		sendingLC.addEventListener(StatusEvent.STATUS, onInitStatus);		
 		sendingLC.send("_in_" + connectionName, "initConnection");
 	}
 		
-	private function initConnection() 
-	{
+	function initConnection() 
+	{		
 		if (loaded) 
 		{
 			return;
 		}
 		loaded = true;
 		sendPendingRequests();
+	}
+	
+	/**
+	 * Add param: test_mode: 1
+	 */
+	public function setTestModeOn()
+	{
+		isTestMode = true;
 	}
 
 	public function callMethod(params: Array<Dynamic>)
@@ -84,11 +93,16 @@ class Connection
 	
 	public function api(method: String, params: Dynamic, onComplete: Dynamic -> Void = null, onError: Dynamic -> Void = null)
 	{
+		if (isTestMode)
+		{	
+			Reflect.setProperty(params, "test_mode", "1");			
+		}
+		
 		var callId:Int = receivingLC.client.registerApiCall(onComplete, onError);
 		sendData(["api", callId, method, params]);
 	}
 
-	private function sendPendingRequests()
+	function sendPendingRequests()
 	{
 		while (pendingRequests.length > 0)
 		{
@@ -96,7 +110,7 @@ class Connection
 		}
 	}
 	
-	private function sendData(params: Array<Dynamic>)
+	function sendData(params: Array<Dynamic>)
 	{
 		if (loaded) 
 		{
@@ -107,7 +121,7 @@ class Connection
 		}
 	}
 	
-	private function onInitStatus(e:StatusEvent)
+	function onInitStatus(e:StatusEvent)
 	{
 		e.target.removeEventListener(e.type, onInitStatus);
 		if (e.level == "status") 
@@ -122,7 +136,7 @@ class Connection
 		receivingLC.client.addEventListener(event, _callback);
 	}
 	
-	private var tempPhoto : ByteArray;
+	 var tempPhoto : ByteArray;
 	
 	public function uploadWallPhoto(img : ByteArray, options : Dynamic, complete : Dynamic -> Void, error : Dynamic -> Void) : Void 
 	{
@@ -135,9 +149,9 @@ class Connection
 	}
 	
 	var urlLoader : URLLoader;
-	private function uploadWallPhotoStep2(params: Dynamic)
+	function uploadWallPhotoStep2(params: Dynamic)
 	{
-		trace(params);
+		//trace(params);
 		/*var sender:URLRequest = new URLRequest(params.upload_url);
 		var vars:URLVariables = new URLVariables();
 		vars.photo = tempPhoto;		
@@ -185,7 +199,7 @@ class Connection
 
 	}
 	
-	private function uploadFinish(e:Event):Void 
+	function uploadFinish(e:Event):Void 
 	{
 		completeF(urlLoader.data);
 	}
