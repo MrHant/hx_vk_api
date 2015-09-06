@@ -17,15 +17,17 @@ class Main extend Sprite
 		var flashVars = this.stage.loaderInfo.parameters;
 		var vk = new Vk(flashVars);
 		
-		// https://vk.com/dev/clientapi
-		var paramsWindow = new Array();
-		paramsWindow.push("setTitle");
-		paramsWindow.push("My Title");
-		
-		vk.callMethod(paramsWindow);
-		
-		vk.api("users.get", [], userGetComplete, userGetError);
-		
+		if (vk.isVKEnvironment())
+		{			
+			// https://vk.com/dev/clientapi
+			var paramsWindow = new Array();
+			paramsWindow.push("setTitle");
+			paramsWindow.push("My Title");
+			
+			vk.callMethod(paramsWindow);
+			
+			vk.api("users.get", {}, userGetComplete, userGetError);
+		}
 	}
 	
 	private function userGetComplete(params:Dynamic):Void {
@@ -56,11 +58,4 @@ class Main extend Sprite
 	}
 
 }
-```
-
-For local machine debuge mode:
-```Haxe
-
-var vk = Vk.createTested();
-
 ```

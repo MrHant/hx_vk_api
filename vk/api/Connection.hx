@@ -151,25 +151,6 @@ class Connection
 	var urlLoader : URLLoader;
 	function uploadWallPhotoStep2(params: Dynamic)
 	{
-		//trace(params);
-		/*var sender:URLRequest = new URLRequest(params.upload_url);
-		var vars:URLVariables = new URLVariables();
-		vars.photo = tempPhoto;		
-		sender.data = "photo:" + tempPhoto;
-		sender.method = URLRequestMethod.POST;
-		urlLoader = new URLLoader();
-		urlLoader.dataFormat = URLLoaderDataFormat.BINARY;		
-		urlLoader.addEventListener(Event.COMPLETE, uploadFinish);
-		
-		try 
-		{
-			urlLoader.load(sender);
-		} 
-		catch (e:Error) 
-		{
-			trace(e);
-		}*/
-		
 		var imageStream = tempPhoto;
  
 		var stream:ByteArray = new ByteArray();
@@ -195,8 +176,6 @@ class Connection
 		{
 			errorF(e);
 		}
-
-
 	}
 	
 	function uploadFinish(e:Event):Void 
