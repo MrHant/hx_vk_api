@@ -9,6 +9,7 @@ class Client extends EventDispatcher implements IClient
 {
 	private var apiCallId: Int = 0;
 	private var apiCalls: Array< String -> Void >;
+	var customEvent : Dynamic;
 	
 	public function new() 
 	{
@@ -23,8 +24,13 @@ class Client extends EventDispatcher implements IClient
 		{
 			if (data.error != null) 
 			{
-				onError(data.error);
-			} else {
+				if (onError != null) {
+					onError(data.error);
+				}
+				else {
+					trace("VKAPI Error: " + data.error);
+				}
+			} else if (onComplete != null) {
 				onComplete(data.response);
 			}
 		}
