@@ -9,6 +9,7 @@ class Client extends EventDispatcher implements IClient
 {
 	private var apiCallId: Int = 0;
 	private var apiCalls: Array< String -> Void >;
+	var customEvent : Dynamic;
 	
 	public function new() 
 	{
